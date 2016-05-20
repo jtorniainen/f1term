@@ -5,9 +5,11 @@
 # MIT license
 
 import requests
+import argparse
 
 
 TRUNK = 'http://ergast.com/api/f1/'
+MAX_NAME_LENGTH = 10
 # Define some colors and effects
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
@@ -43,8 +45,17 @@ def get_last_race():
     print(BOLD + race['raceName'] + ENDC + '\n')
     print_race_results(race['Results'])
 
-def get_standings(season='current'):
+def get_schedule(season='current'):
+    pass
+
+
+
+
+def get_standings(season):
     """ Pulls and displays standings for the specified season. """
+
+    if not season:
+        season = 'current'
     resp = requests.get(TRUNK + season + '/driverStandings.json').json()
     data = resp['MRData']['StandingsTable']
     season = data['season']
@@ -54,11 +65,28 @@ def get_standings(season='current'):
 
     for standing in standings:
         print(BOLD + '{:02d}. '.format(int(standing['position'])) + ENDC, end='')
-        print(standing['Driver']['familyName'] + '\t', end='')
+        driver_name = standing['Driver']['familyName']
+        if len(driver_name) > MAX_NAME_LENGTH:
+            driver_name = driver_name[0:MAX_NAME_LENGTH - 1] + '.'
+        print(driver_name + '\t', end='')
         print(OKBLUE + standing['wins'] + ' ' + HEADER + standing['points'] + '\t' + ENDC, end='')
         print(WARNING + standing['Constructors'][0]['name'] + ENDC)
 
 
 if __name__ == '__main__':
     # get_last_race()
-    get_standings()
+    # get_standings()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', help="results, standings or schedule")
+    parser.add_argument('-s','--season', help="Season as a year, use 'current' for the latest",type=str)
+    arguments = parser.parse_args()
+
+    if arguments.command == 'standings':
+        get_standings(arguments.season)
+    elif arguments.command == 'results':
+        get_last_race()
+    elif arguments.command == 'schedule':
+        pass
+    elif arguments.command == 'next_race':
+        pass
