@@ -6,6 +6,8 @@
 
 import requests
 
+
+TRUNK = 'http://ergast.com/api/f1/'
 # Define some colors and effects
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
@@ -33,7 +35,7 @@ def print_race_results(race):
 
 def get_last_race():
     """ Pulls and displays the results of the latest race. """
-    response = requests.get('http://ergast.com/api/f1/current/last/results.json').json()
+    response = requests.get(TRUNK + 'current/last/results.json').json()
     race = response['MRData']['RaceTable']['Races'][0]
 
 
@@ -41,6 +43,24 @@ def get_last_race():
     print(BOLD + race['raceName'] + ENDC + '\n')
     print_race_results(race['Results'])
 
+def get_standings(season='current'):
+    resp = requests.get(TRUNK + 'current/driverStandings.json').json()
+    data = resp['MRData']['StandingsTable']
+    season = data['season']
+    standings = data['StandingsLists'][0]['DriverStandings']
+
+    print('Season {}\n'.format(season))
+
+    for standing in standings:
+        # print('{:02d}. {}\t{}\t{}'.format(int(standing['position']), standing['Driver']['familyName'], standing['Constructors'][0]['name'], standing['wins']))
+        print(BOLD + '{:02d}. '.format(int(standing['position'])) + ENDC, end='')
+        print(standing['Driver']['familyName'] + '\t', end='')
+        print(OKBLUE + standing['wins'] + ' ' + HEADER + standing['points'] + '\t' + ENDC, end='')
+        print(WARNING + standing['Constructors'][0]['name'] + ENDC)
+
+
+
 
 if __name__ == '__main__':
-    get_last_race()
+    # get_last_race()
+    get_standings()
