@@ -35,9 +35,15 @@ def print_race_results(race):
         print('{}\t{}'.format(item['Driver']['familyName'], time), end="")
         print('')
 
-def get_last_race():
+def get_race(season, round_num):
     """ Pulls and displays the results of the latest race. """
-    response = requests.get(TRUNK + 'current/last/results.json').json()
+    if not season:
+        season = 'current'
+
+    if not round_num:
+        round_num = 'last'
+
+    response = requests.get(TRUNK + season + '/' + round_num + '/results.json').json()
     race = response['MRData']['RaceTable']['Races'][0]
 
 
@@ -68,6 +74,8 @@ def get_standings(season):
         driver_name = standing['Driver']['familyName']
         if len(driver_name) > MAX_NAME_LENGTH:
             driver_name = driver_name[0:MAX_NAME_LENGTH - 1] + '.'
+        else:
+            driver_name = driver_name + (MAX_NAME_LENGTH - len(driver_name)) * ' '
         print(driver_name + '\t', end='')
         print(OKBLUE + standing['wins'] + ' ' + HEADER + standing['points'] + '\t' + ENDC, end='')
         print(WARNING + standing['Constructors'][0]['name'] + ENDC)
@@ -79,13 +87,14 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('command', help="results, standings or schedule")
-    parser.add_argument('-s','--season', help="Season as a year, use 'current' for the latest",type=str)
+    parser.add_argument('-s','--season', help="Season as a year, leave blank for the latest",type=str)
+    parser.add_argument('-r','--round', help="Round as a number, leave blank for latest",type=str)
     arguments = parser.parse_args()
 
     if arguments.command == 'standings':
         get_standings(arguments.season)
     elif arguments.command == 'results':
-        get_last_race()
+        get_race(arguments.season, arguments.round)
     elif arguments.command == 'schedule':
         pass
     elif arguments.command == 'next_race':
