@@ -44,7 +44,8 @@ def get_last_race():
     print_race_results(race['Results'])
 
 def get_standings(season='current'):
-    resp = requests.get(TRUNK + 'current/driverStandings.json').json()
+    """ Pulls and displays standings for the specified season. """
+    resp = requests.get(TRUNK + season + '/driverStandings.json').json()
     data = resp['MRData']['StandingsTable']
     season = data['season']
     standings = data['StandingsLists'][0]['DriverStandings']
@@ -52,13 +53,10 @@ def get_standings(season='current'):
     print('Season {}\n'.format(season))
 
     for standing in standings:
-        # print('{:02d}. {}\t{}\t{}'.format(int(standing['position']), standing['Driver']['familyName'], standing['Constructors'][0]['name'], standing['wins']))
         print(BOLD + '{:02d}. '.format(int(standing['position'])) + ENDC, end='')
         print(standing['Driver']['familyName'] + '\t', end='')
         print(OKBLUE + standing['wins'] + ' ' + HEADER + standing['points'] + '\t' + ENDC, end='')
         print(WARNING + standing['Constructors'][0]['name'] + ENDC)
-
-
 
 
 if __name__ == '__main__':
