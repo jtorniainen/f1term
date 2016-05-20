@@ -6,6 +6,7 @@
 
 import requests
 
+# Define some colors and effects
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
 OKGREEN = '\033[92m'
@@ -15,18 +16,9 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
-def last_race():
-    """ Pulls and displays the results of the latest race. """
-    response = requests.get('http://ergast.com/api/f1/current/last/results.json').json()
-    race = response['MRData']['RaceTable']['Races'][0]
-    data = race['Results']
-
-
-    # HEADER: round, date, raceName, season, 'C'
-    print('Round {} [{}]'.format(race['round'], race['date']))
-    print(BOLD + race['raceName'] + ENDC + '\n')
-
-    for item in data:
+def print_race_results(race):
+    """ Prints the contents of a race result dict. """
+    for item in race:
         if 'Time' in item.keys():
             time = item['Time']['time']
             if len(time) < 11:
@@ -39,5 +31,16 @@ def last_race():
         print('{}\t{}'.format(item['Driver']['familyName'], time), end="")
         print('')
 
+def get_last_race():
+    """ Pulls and displays the results of the latest race. """
+    response = requests.get('http://ergast.com/api/f1/current/last/results.json').json()
+    race = response['MRData']['RaceTable']['Races'][0]
+
+
+    print('Round {} [{}]'.format(race['round'], race['date']))
+    print(BOLD + race['raceName'] + ENDC + '\n')
+    print_race_results(race['Results'])
+
+
 if __name__ == '__main__':
-    last_race()
+    get_last_race()
