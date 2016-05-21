@@ -30,7 +30,7 @@ def print_race_results(race):
                 time = (11- len(time)) * ' ' + time
             time = OKGREEN + time + ENDC
         else:
-            time = FAIL + 8 * ' ' +'DNF' + ENDC
+            time = FAIL + 8 * ' ' +'DNF {}'.format(item['status']) + ENDC
 
         print(BOLD + '{:02d}. '.format(int(item['position'])) + ENDC, end="")
         print('{}\t{}'.format(item['Driver']['familyName'], time), end="")
