@@ -6,6 +6,7 @@
 
 import requests
 import argparse
+import time
 
 
 TRUNK = 'http://ergast.com/api/f1/'
@@ -51,8 +52,33 @@ def get_race(season, round_num):
     print(BOLD + race['raceName'] + ENDC + '\n')
     print_race_results(race['Results'])
 
-def get_schedule(season='current'):
-    pass
+def get_schedule(season):
+    if not season:
+        season = 'current'
+    resp = requests.get(TRUNK + season + '.json').json()
+    races = resp['MRData']['RaceTable']['Races']
+    pattern = '%Y-%m-%d %H:%M:%S'
+    next_race = False
+    for race in races:
+        race_name = race['raceName']
+        if len(race_name) < 24:
+            race_name = race_name + (24 - len(race_name)) * ' '
+        date = (race['date'] + ' ' + race['time'])[:-1]
+        date_str = race['date']
+        epoch = int(time.mktime(time.strptime(date, pattern)))
+        if time.time() - epoch > 0:
+            date_color = OKGREEN
+        else:
+            if next_race == False:
+                date_color = WARNING + BOLD
+                date_str = date_str + ' «'
+                next_race = True
+            else:
+                date_color = WARNING
+
+        print(BOLD + '{:02d}. '.format(int(race['round'])) + ENDC, end='')
+        print(race_name + '\t', end='')
+        print(date_color + date_str + ENDC)
 
 
 
@@ -96,6 +122,6 @@ if __name__ == '__main__':
     elif arguments.command == 'results':
         get_race(arguments.season, arguments.round)
     elif arguments.command == 'schedule':
-        pass
+        get_schedule(arguments.season)
     elif arguments.command == 'next_race':
         pass
