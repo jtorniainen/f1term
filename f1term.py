@@ -21,6 +21,12 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
+def truncate_name(name):
+    if len(name) > MAX_NAME_LENGTH:
+        return name[0:MAX_NAME_LENGTH - 1] + '.'
+    else:
+        return name
+
 def print_race_results(race):
     """ Prints the contents of a race result dict. """
     for item in race:
@@ -68,13 +74,15 @@ def get_schedule(season):
         epoch = int(time.mktime(time.strptime(date, pattern)))
         if time.time() - epoch > 0:
             date_color = OKGREEN
+            date_str = '  ' + date_str
         else:
             if next_race == False:
                 date_color = WARNING + BOLD
-                date_str = date_str + ' «'
+                date_str = '» ' + date_str + ' «'
                 next_race = True
             else:
                 date_color = WARNING
+                date_str = '  ' + date_str
 
         print(BOLD + '{:02d}. '.format(int(race['round'])) + ENDC, end='')
         print(race_name + '\t', end='')
