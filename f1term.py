@@ -21,11 +21,13 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
+
 def truncate_name(name):
     if len(name) > MAX_NAME_LENGTH:
         return name[0:MAX_NAME_LENGTH - 1] + '.'
     else:
         return name
+
 
 def print_race_results(race):
     """ Prints the contents of a race result dict. """
@@ -42,6 +44,7 @@ def print_race_results(race):
         print('{}\t{}'.format(item['Driver']['familyName'], time), end="")
         print('')
 
+
 def get_race(season, round_num):
     """ Pulls and displays the results of the latest race. """
     if not season:
@@ -53,12 +56,25 @@ def get_race(season, round_num):
     response = requests.get(TRUNK + season + '/' + round_num + '/results.json').json()
     race = response['MRData']['RaceTable']['Races'][0]
 
-
     print('Round {} [{}]'.format(race['round'], race['date']))
     print(BOLD + race['raceName'] + ENDC + '\n')
-    print_race_results(race['Results'])
+
+    for item in race['Results']:
+        if 'Time' in item.keys():
+            time = item['Time']['time']
+            if len(time) < 11:
+                time = (11- len(time)) * ' ' + time
+            time = OKGREEN + time + ENDC
+        else:
+            time = FAIL + 8 * ' ' +'DNF {}'.format(item['status']) + ENDC
+
+        print(BOLD + '{:02d}. '.format(int(item['position'])) + ENDC, end="")
+        print('{}\t{}'.format(item['Driver']['familyName'], time), end="")
+        print('')
+
 
 def get_schedule(season):
+    """ Pull the schedule for the specified season. """
     if not season:
         season = 'current'
     resp = requests.get(TRUNK + season + '.json').json()
@@ -89,8 +105,6 @@ def get_schedule(season):
         print(date_color + date_str + ENDC)
 
 
-
-
 def get_standings(season):
     """ Pulls and displays standings for the specified season. """
 
@@ -116,9 +130,6 @@ def get_standings(season):
 
 
 if __name__ == '__main__':
-    # get_last_race()
-    # get_standings()
-
     parser = argparse.ArgumentParser()
     parser.add_argument('command', help="results, standings or schedule")
     parser.add_argument('-s','--season', help="Season as a year, leave blank for the latest",type=str)
